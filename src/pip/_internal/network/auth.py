@@ -140,6 +140,7 @@ class KeyRingCliProvider(KeyRingBaseProvider):
             stdout=subprocess.PIPE,
             env=env,
         )
+        __import__('pdb').set_trace()#<<<
         if res.returncode:
             return None
 

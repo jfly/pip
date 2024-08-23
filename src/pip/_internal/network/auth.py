@@ -198,8 +198,15 @@ def which_skip_scripts(command: str) -> Optional[str]:
     return path
 
 
-def get_keyring_provider(provider: str) -> KeyRingBaseProvider:
+def get_keyring_provider(
+    provider: str, keyring_executable: Optional[Path]
+) -> KeyRingBaseProvider:
     logger.verbose("Keyring provider requested: %s", provider)
+
+    if keyring_executable is not None:
+        assert (
+            provider == "subprocess"
+        ), "Must use keyring_provider 'subprocess' if specifying a keyring_executable"
 
     if provider in ["import", "auto"]:
         try:
@@ -216,7 +223,12 @@ def get_keyring_provider(provider: str) -> KeyRingBaseProvider:
                 msg = msg + ", trying to find a keyring executable as a fallback"
             logger.warning(msg, exc, exc_info=logger.isEnabledFor(logging.DEBUG))
     if provider in ["subprocess", "auto"]:
-        cli = which_skip_scripts("keyring")
+        cli = (
+            str(keyring_executable)
+            if keyring_executable is not None
+            else which_skip_scripts("keyring")
+        )
+
         if cli:
             logger.verbose("Keyring provider set: subprocess with executable %s", cli)
             return KeyRingCliProvider(cli)
@@ -231,11 +243,15 @@ class MultiDomainBasicAuth(AuthBase):
         prompting: bool = True,
         index_urls: Optional[List[str]] = None,
         keyring_provider: str = "auto",
+        keyring_executable: Optional[Path] = None,
     ) -> None:
         self._prompting = prompting
         self._index_urls = index_urls
         self._keyring_provider_name = keyring_provider
-        self._keyring_provider = get_keyring_provider(self._keyring_provider_name)
+        self._keyring_executable = keyring_executable
+        self._keyring_provider = get_keyring_provider(
+            self._keyring_provider_name, self._keyring_executable
+        )
         self._passwords: Dict[str, AuthInfo] = {}
         # When the user is prompted to enter credentials and keyring is
         # available, we will offer to save them. If the user accepts,
@@ -277,7 +293,9 @@ class MultiDomainBasicAuth(AuthBase):
             )
             # Disable keyring.
             self._keyring_provider_name = "disabled"
-            self._keyring_provider = get_keyring_provider(self._keyring_provider_name)
+            self._keyring_provider = get_keyring_provider(
+                self._keyring_provider_name, self._keyring_executable
+            )
             return None
 
     def _get_index_url(self, url: str) -> Optional[str]:

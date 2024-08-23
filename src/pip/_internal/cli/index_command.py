@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 from optparse import Values
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional
 
 from pip._vendor import certifi
@@ -106,6 +107,7 @@ class SessionCommandMixin(CommandContextMixIn):
                 # Determine if we can prompt the user for authentication or not
                 prompting=not options.no_input,
                 keyring_provider=options.keyring_provider,
+                keyring_executable=Path(options.keyring_executable),
             ),
         )
 

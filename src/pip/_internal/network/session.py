@@ -17,6 +17,7 @@ import sys
 import urllib.parse
 import warnings
 from dataclasses import dataclass
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -323,6 +324,7 @@ class MultiDomainAuthSettings:
     prompting: bool = True
     index_urls: Optional[List[str]] = None
     keyring_provider: str = "auto"
+    keyring_executable: Optional[Path] = None
 
 
 class PipSession(requests.Session):
@@ -358,6 +360,7 @@ class PipSession(requests.Session):
             prompting=multi_domain_auth_settings.prompting,
             index_urls=multi_domain_auth_settings.index_urls,
             keyring_provider=multi_domain_auth_settings.keyring_provider,
+            keyring_executable=multi_domain_auth_settings.keyring_executable,
         )
 
         # Create our urllib3.Retry instance which will allow us to customize

@@ -265,6 +265,18 @@ keyring_provider: Callable[..., Option] = partial(
     ),
 )
 
+keyring_executable: Callable[..., Option] = partial(
+    Option,
+    "--keyring-executable",
+    dest="keyring_executable",
+    metavar="path",
+    help=(
+        "Path to a keyring executable."
+        " Implies --keyring-provider=subprocess."
+        " Incompatible with any other keyring provider."
+    ),
+)
+
 proxy: Callable[..., Option] = partial(
     Option,
     "--proxy",
@@ -1047,6 +1059,7 @@ general_group: Dict[str, Any] = {
         log,
         no_input,
         keyring_provider,
+        keyring_executable,
         proxy,
         retries,
         timeout,

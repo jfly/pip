@@ -228,4 +228,16 @@ class Command(CommandContextMixIn):
                 )
                 options.cache_dir = None
 
+        if options.keyring_executable is not None:
+            if options.keyring_provider == "subprocess":
+                pass
+            elif options.keyring_provider == "auto":
+                options.keyring_provider = "subprocess"
+            else:
+                logger.critical(
+                    "Keyring executable only makes sense with keyring "
+                    "provider 'auto' or 'subprocess'."
+                )
+                sys.exit(ERROR)
+
         return self._run_wrapper(level_number, options, args)
